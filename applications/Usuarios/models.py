@@ -13,3 +13,16 @@ class Progreso(models.Model):
     leccion = models.CharField(max_length=200)
     categoria = models.CharField(max_length=100)
     fecha_completada = models.DateTimeField(auto_now_add=True)
+
+
+class PerfilUsuario(models.Model):
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil')
+    telefono = models.CharField(max_length=20, blank=True, null=True)
+    fecha_nacimiento = models.DateField(blank=True, null=True)
+    direccion = models.TextField(blank=True, null=True)
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f'Perfil de {self.usuario.username}'

@@ -7,7 +7,7 @@ class ProgresoUsuarioForm(forms.ModelForm):
     
     class Meta:
         model = ProgresoUsuario
-        fields = ['actividad', 'progreso', 'completado', 'notas']
+        fields = ['actividad', 'progreso', 'completado', 'resultado']
         widgets = {
             'actividad': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -23,17 +23,17 @@ class ProgresoUsuarioForm(forms.ModelForm):
             'completado': forms.CheckboxInput(attrs={
                 'class': 'form-check-input'
             }),
-            'notas': forms.Textarea(attrs={
+            'resultado': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
-                'placeholder': 'Notas adicionales (opcional)'
+                'placeholder': 'Resultado o notas adicionales (opcional)'
             }),
         }
         labels = {
             'actividad': 'Actividad',
             'progreso': 'Progreso (%)',
             'completado': 'Completado',
-            'notas': 'Notas',
+            'resultado': 'Resultado',
         }
     
     def clean_progreso(self):

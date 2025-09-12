@@ -1,7 +1,7 @@
 from django.apps import AppConfig
 
 
-class InicioSesionConfig(AppConfig):
+class UsuariosConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'applications.inicio_sesion'
-    verbose_name = 'Inicio de Sesión'
+    name = 'applications.Usuarios'
+    verbose_name = 'Usuarios'

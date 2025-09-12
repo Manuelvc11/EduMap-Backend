@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.models import User
@@ -13,6 +13,34 @@ from django.core.exceptions import ValidationError
 import json
 from .forms import FormularioRegistroPersonalizado, FormularioPerfilUsuario
 from .models import PerfilUsuario
+
+
+def vista_home(request):
+    """
+    Vista de página principal que devuelve información de la API
+    """
+    return JsonResponse({
+        'success': True,
+        'message': '¡Bienvenido a EduMap API!',
+        'version': '1.0.0',
+        'endpoints': {
+            'usuarios': {
+                'login': '/api/usuarios/login/',
+                'logout': '/api/usuarios/logout/',
+                'register': '/api/usuarios/register/',
+                'dashboard': '/api/usuarios/dashboard/',
+                'profile': '/api/usuarios/profile/'
+            },
+            'progreso': {
+                'lista': '/api/progreso/',
+                'crear': '/api/progreso/crear/',
+                'detalle': '/api/progreso/<id>/',
+                'editar': '/api/progreso/<id>/editar/',
+                'eliminar': '/api/progreso/<id>/eliminar/'
+            }
+        },
+        'documentation': 'Consulta la documentación en /admin/ para más detalles'
+    })
 
 
 @csrf_exempt
@@ -138,7 +166,7 @@ def vista_registro(request):
         data = json.loads(request.body)
         
         # Validar campos requeridos
-        required_fields = ['email', 'password']
+        required_fields = ['email', 'password', 'username']
         for field in required_fields:
             if not data.get(field):
                 return JsonResponse({
@@ -157,6 +185,7 @@ def vista_registro(request):
         user = User.objects.create_user(
             email=data['email'],
             password=data['password'],
+            username=data['username'],
         )
         
         return JsonResponse({
@@ -165,6 +194,7 @@ def vista_registro(request):
             'user': {
                 'id': user.id,
                 'email': user.email,
+                'username': user.username,
             }
         }, status=201)
         
@@ -195,6 +225,8 @@ def vista_perfil(request):
         if request.method == 'GET':
             # Obtener datos del perfil
             perfil_data = {
+                'username': perfil.usuario.username,
+                'email': perfil.usuario.email,
                 'telefono': perfil.telefono,
                 'fecha_nacimiento': perfil.fecha_nacimiento.isoformat() if perfil.fecha_nacimiento else None,
                 'direccion': perfil.direccion,
