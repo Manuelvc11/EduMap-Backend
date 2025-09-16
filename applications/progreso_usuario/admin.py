@@ -25,7 +25,6 @@ class ProgresoUsuarioAdmin(admin.ModelAdmin):
         }),
     )
 
-
 @admin.register(LogProgreso)
 class LogProgresoAdmin(admin.ModelAdmin):
     list_display = ['progreso_usuario', 'progreso_anterior', 'progreso_nuevo', 'fecha_cambio']

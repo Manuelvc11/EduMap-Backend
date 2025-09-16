@@ -216,14 +216,12 @@ def vista_perfil(request):
     API para ver y editar el perfil del usuario
     """
     try:
-        # Obtener o crear perfil
         try:
             perfil = request.user.perfil
         except PerfilUsuario.DoesNotExist:
             perfil = PerfilUsuario.objects.create(usuario=request.user)
         
         if request.method == 'GET':
-            # Obtener datos del perfil
             perfil_data = {
                 'username': perfil.usuario.username,
                 'email': perfil.usuario.email,
@@ -241,7 +239,7 @@ def vista_perfil(request):
             })
         
         elif request.method == 'POST':
-            # Actualizar perfil
+            
             data = json.loads(request.body)
             
             perfil.telefono = data.get('telefono', perfil.telefono)
