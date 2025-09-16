@@ -84,6 +84,9 @@ El servidor estará disponible en: http://127.0.0.1:8000/
 
 ```
 EduMap-Backend/
+├── applications/           # Aplicaciones Django
+│   ├── Usuarios/          # Aplicación de usuarios
+│   └── progreso_usuario/  # Aplicación de progreso de usuarios
 ├── edumap/                 # Proyecto Django principal
 │   ├── edumap/            # Configuración del proyecto
 │   │   ├── __init__.py
@@ -95,6 +98,175 @@ EduMap-Backend/
 │   └── db.sqlite3         # Base de datos SQLite
 ├── README.md               # Este archivo
 └── .gitignore             # Archivos a ignorar por Git
+```
+
+## Endpoints de la API
+
+### Aplicación: Usuarios
+
+#### Autenticación y Gestión de Usuarios
+| Método | Endpoint | Descripción | Autenticación |
+|--------|----------|-------------|---------------|
+| GET | `/` | Información de la API y endpoints disponibles | ❌ No requerida |
+| POST | `/usuarios/login/` | Iniciar sesión | ❌ No requerida |
+| POST | `/usuarios/logout/` | Cerrar sesión | ❌ No requerida |
+| POST | `/usuarios/register/` | Registrar nuevo usuario | ❌ No requerida |
+| GET | `/usuarios/dashboard/` | Dashboard del usuario autenticado | ✅ Requerida |
+| GET | `/usuarios/profile/` | Ver perfil del usuario | ✅ Requerida |
+| POST | `/usuarios/profile/` | Actualizar perfil del usuario | ✅ Requerida |
+
+#### Parámetros de Request
+
+**POST `/usuarios/login/`:**
+```json
+{
+    "username": "usuario123",
+    "password": "contraseña123"
+}
+```
+
+**POST `/usuarios/register/`:**
+```json
+{
+    "username": "usuario123",
+    "email": "usuario@ejemplo.com",
+    "password": "contraseña123"
+}
+```
+
+**POST `/usuarios/profile/`:**
+```json
+{
+    "telefono": "+1234567890",
+    "fecha_nacimiento": "1990-01-01",
+    "direccion": "Calle Principal 123"
+}
+```
+
+#### Ejemplos de Respuesta
+
+**Login exitoso:**
+```json
+{
+    "success": true,
+    "message": "¡Bienvenido, Usuario!",
+    "user": {
+        "id": 1,
+        "username": "usuario123",
+        "email": "usuario@ejemplo.com",
+        "first_name": "Usuario",
+        "last_name": "Apellido",
+        "is_active": true,
+        "date_joined": "2024-01-01T10:00:00Z"
+    }
+}
+```
+
+**Dashboard:**
+```json
+{
+    "success": true,
+    "user": {
+        "id": 1,
+        "username": "usuario123",
+        "email": "usuario@ejemplo.com",
+        "first_name": "Usuario",
+        "last_name": "Apellido",
+        "is_active": true,
+        "date_joined": "2024-01-01T10:00:00Z"
+    },
+    "perfil": {
+        "telefono": "+1234567890",
+        "fecha_nacimiento": "1990-01-01",
+        "direccion": "Calle Principal 123",
+        "avatar": "/media/avatars/avatar.jpg",
+        "fecha_creacion": "2024-01-01T10:00:00Z",
+        "fecha_actualizacion": "2024-01-15T14:30:00Z"
+    }
+}
+```
+
+### Aplicación: Progreso Usuario
+
+#### Gestión de Progreso
+| Método | Endpoint | Descripción | Autenticación |
+|--------|----------|-------------|---------------|
+| GET | `/progreso/` | Lista todos los progresos del usuario | ✅ Requerida |
+| POST | `/progreso/crear/` | Crea un nuevo progreso | ✅ Requerida |
+| GET | `/progreso/<id>/` | Detalle de un progreso específico | ✅ Requerida |
+| GET | `/progreso/<id>/editar/` | Formulario de edición | ✅ Requerida |
+| POST | `/progreso/<id>/editar/` | Actualiza un progreso | ✅ Requerida |
+| GET | `/progreso/<id>/eliminar/` | Confirmación de eliminación | ✅ Requerida |
+| POST | `/progreso/<id>/eliminar/` | Elimina un progreso | ✅ Requerida |
+| POST | `/progreso/<id>/actualizar-ajax/` | Actualización rápida vía AJAX | ✅ Requerida |
+
+#### Parámetros de Filtrado (GET `/progreso/`)
+- `actividad`: Filtrar por nombre de actividad
+- `completado`: Filtrar por estado (true/false)
+- `page`: Número de página para paginación
+
+#### Ejemplo de Respuesta AJAX (POST `/progreso/<id>/actualizar-ajax/`)
+```json
+{
+    "success": true,
+    "progreso": 75.00,
+    "completado": false
+}
+```
+
+#### Modelos de Datos
+
+**Usuario (Django Auth):**
+```json
+{
+    "id": 1,
+    "username": "usuario123",
+    "email": "usuario@ejemplo.com",
+    "first_name": "Usuario",
+    "last_name": "Apellido",
+    "is_active": true,
+    "date_joined": "2024-01-01T10:00:00Z"
+}
+```
+
+**PerfilUsuario:**
+```json
+{
+    "id": 1,
+    "usuario": 1,
+    "telefono": "+1234567890",
+    "fecha_nacimiento": "1990-01-01",
+    "direccion": "Calle Principal 123",
+    "avatar": "/media/avatars/avatar.jpg",
+    "fecha_creacion": "2024-01-01T10:00:00Z",
+    "fecha_actualizacion": "2024-01-15T14:30:00Z"
+}
+```
+
+**ProgresoUsuario:**
+```json
+{
+    "id": 1,
+    "usuario": "username",
+    "actividad": "Aprender Django",
+    "progreso": 75.50,
+    "fecha_inicio": "2024-01-01T10:00:00Z",
+    "fecha_actualizacion": "2024-01-15T14:30:00Z",
+    "completado": false,
+    "resultado": "Notas sobre el progreso"
+}
+```
+
+**LogProgreso:**
+```json
+{
+    "id": 1,
+    "progreso_usuario": 1,
+    "progreso_anterior": 50.00,
+    "progreso_nuevo": 75.50,
+    "fecha_cambio": "2024-01-15T14:30:00Z",
+    "descripcion": "Progreso actualizado"
+}
 ```
 
 ## Comandos Útiles
