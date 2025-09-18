@@ -210,6 +210,7 @@ def vista_registro(request):
         }, status=500)
 
 
+@csrf_exempt
 @login_required
 def vista_perfil(request):
     """

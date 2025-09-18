@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-=x2_i8cf^8ahk$ejxbzdnwdjty99oeu&0a)cns__34df_&45pn'
 
-DJANGO_APPS = [
+INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -16,17 +16,6 @@ DJANGO_APPS = [
     'applications.Usuarios',
     'applications.progreso_usuario',
 ]
-
-LOCAL_APPS = [
-    'applications.Usuarios',
-    'applications.progreso_usuario',
-]
-
-THIRD_PARTY_APPS = [
-    'rest_framework',
-]
-
-INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
