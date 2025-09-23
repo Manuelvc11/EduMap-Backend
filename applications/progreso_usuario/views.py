@@ -221,6 +221,7 @@ def editar_progreso(request, pk):
         }, status=500)
 
 
+@csrf_exempt
 @login_required
 @require_http_methods(["POST"])
 def actualizar_progreso_ajax(request, pk):

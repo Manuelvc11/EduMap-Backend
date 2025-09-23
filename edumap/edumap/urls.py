@@ -22,5 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.vista_home, name='home'),
     path('api/usuarios/', include('applications.Usuarios.urls')),
-    path('api/progreso/', include('applications.progreso_usuario.urls')),
+    path('progreso_usuario/', include('applications.progreso_usuario.urls')),
 ]
