@@ -1,0 +1,22 @@
+# Dependencias para web scraping de noticias
+# Instalar con: pip install -r requirements/scraping.txt
+
+# Web scraping
+requests==2.31.0
+beautifulsoup4==4.12.2
+lxml==4.9.3
+
+# Django REST Framework (si no está instalado)
+djangorestframework==3.14.0
+
+# Para manejo de fechas y tiempo
+python-dateutil==2.8.2
+
+# Para validación de URLs
+validators==0.22.0
+
+# Para logging mejorado
+colorlog==6.7.0
+
+# Para manejo de encoding
+chardet==5.2.0

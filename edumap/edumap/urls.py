@@ -23,4 +23,5 @@ urlpatterns = [
     path('', views.vista_home, name='home'),
     path('api/usuarios/', include('applications.Usuarios.urls')),
     path('progreso_usuario/', include('applications.progreso_usuario.urls')),
+    path('api/noticias/', include('applications.noticias.urls')),
 ]
