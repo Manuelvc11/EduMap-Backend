@@ -166,7 +166,7 @@ def vista_registro(request):
         data = json.loads(request.body)
         
         # Validar campos requeridos
-        required_fields = ['email', 'password', 'username', 'nombre']
+        required_fields = ['email', 'password', 'username', 'first_name', 'last_name']
         for field in required_fields:
             if not data.get(field):
                 return JsonResponse({
@@ -181,16 +181,25 @@ def vista_registro(request):
                 'message': 'El email ya está registrado'
             }, status=400)
         
+        # Verificar que el username no exista
+        if User.objects.filter(username=data['username']).exists():
+            return JsonResponse({
+                'success': False,
+                'message': 'El nombre de usuario ya está registrado'
+            }, status=400)
+        
         # Crear el usuario de Django
         user = User.objects.create_user(
             email=data['email'],
             password=data['password'],
             username=data['username'],
+            first_name=data['first_name'],
+            last_name=data['last_name']
         )
         
         # Crear el usuario personalizado
         usuario = Usuario.objects.create(
-            nombre=data['nombre'],
+            nombre=f"{data['first_name']} {data['last_name']}",
             correo=data['email'],
             contrasena=data['password']  # Nota: en producción deberías encriptar esta contraseña
         )
@@ -202,7 +211,9 @@ def vista_registro(request):
                 'id': user.id,
                 'email': user.email,
                 'username': user.username,
-                'nombre': usuario.nombre
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'nombre_completo': usuario.nombre
             }
         }, status=201)
         
