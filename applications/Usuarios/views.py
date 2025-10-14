@@ -277,35 +277,72 @@ def vista_perfil(request):
             })
         
         elif request.method == 'POST':
-            
-            data = json.loads(request.body)
-            
-            perfil.telefono = data.get('telefono', perfil.telefono)
-            perfil.direccion = data.get('direccion', perfil.direccion)
-            
-            # Manejar fecha de nacimiento
-            fecha_nacimiento = data.get('fecha_nacimiento')
-            if fecha_nacimiento:
-                from datetime import datetime
+            try:
+                data = json.loads(request.body)
+                
+                # Actualizar datos del perfil
+                perfil.telefono = data.get('telefono', perfil.telefono)
+                perfil.direccion = data.get('direccion', perfil.direccion)
+                
+                # Manejar fecha de nacimiento
+                fecha_nacimiento = data.get('fecha_nacimiento')
+                if fecha_nacimiento:
+                    from datetime import datetime
+                    try:
+                        perfil.fecha_nacimiento = datetime.fromisoformat(fecha_nacimiento).date()
+                    except ValueError:
+                        return JsonResponse({
+                            'success': False,
+                            'message': 'Formato de fecha inválido. Use YYYY-MM-DD'
+                        }, status=400)
+                
+                # Actualizar datos del usuario
+                if 'first_name' in data:
+                    request.user.first_name = data['first_name']
+                if 'last_name' in data:
+                    request.user.last_name = data['last_name']
+                
+                # Actualizar el usuario personalizado si existe
                 try:
-                    perfil.fecha_nacimiento = datetime.fromisoformat(fecha_nacimiento).date()
-                except ValueError:
-                    return JsonResponse({
-                        'success': False,
-                        'message': 'Formato de fecha inválido. Use YYYY-MM-DD'
-                    }, status=400)
+                    usuario = Usuario.objects.get(correo=request.user.email)
+                    if 'first_name' in data or 'last_name' in data:
+                        usuario.nombre = f"{request.user.first_name} {request.user.last_name}"
+                        usuario.save()
+                except Usuario.DoesNotExist:
+                    pass
+                
+                request.user.save()
+                perfil.save()
+
+            except json.JSONDecodeError:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'JSON inválido'
+                }, status=400)
+            except Exception as e:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Error al actualizar perfil: {str(e)}'
+                }, status=500)
             
-            perfil.save()
-            
+            try:
+                usuario = Usuario.objects.get(correo=request.user.email)
+                nombre_completo = usuario.nombre
+            except Usuario.DoesNotExist:
+                nombre_completo = f"{request.user.first_name} {request.user.last_name}"
+
             return JsonResponse({
                 'success': True,
                 'message': 'Perfil actualizado correctamente',
+                'user': {
+                    'id': request.user.id,
+                    'username': request.user.username,
+                    'email': request.user.email,
+                    'first_name': request.user.first_name,
+                    'last_name': request.user.last_name,
+                    'nombre_completo': nombre_completo
+                },
                 'perfil': {
-                    'username': perfil.usuario.username,
-                    'email': perfil.usuario.email,
-                    'first_name': perfil.usuario.first_name,
-                    'last_name': perfil.usuario.last_name,
-                    'nombre_completo': f"{perfil.usuario.first_name} {perfil.usuario.last_name}",
                     'telefono': perfil.telefono,
                     'fecha_nacimiento': perfil.fecha_nacimiento.isoformat() if perfil.fecha_nacimiento else None,
                     'direccion': perfil.direccion,
