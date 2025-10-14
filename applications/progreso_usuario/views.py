@@ -224,12 +224,15 @@ def editar_progreso(request, pk):
 @csrf_exempt
 @login_required
 @require_http_methods(["POST"])
-def actualizar_progreso_ajax(request, pk):
-    """Vista AJAX para actualizar progreso rápidamente"""
+def actualizar_progreso(request, pk):
+    """API endpoint para actualizar el progreso de una actividad"""
     try:
+        import json
+        data = json.loads(request.body)
+        
         progreso = get_object_or_404(ProgresoUsuario, pk=pk, usuario=request.user)
         
-        nuevo_progreso = request.POST.get('progreso')
+        nuevo_progreso = data.get('progreso')
         if nuevo_progreso is not None:
             try:
                 progreso_anterior = progreso.progreso
@@ -242,13 +245,18 @@ def actualizar_progreso_ajax(request, pk):
                     progreso_usuario=progreso,
                     progreso_anterior=progreso_anterior,
                     progreso_nuevo=progreso.progreso,
-                    descripcion="Progreso actualizado vía AJAX"
+                    descripcion="Progreso actualizado mediante API"
                 )
                 
                 return JsonResponse({
                     'success': True,
-                    'progreso': float(progreso.progreso),
-                    'completado': progreso.completado
+                    'data': {
+                        'id': progreso.id,
+                        'progreso': float(progreso.progreso),
+                        'completado': progreso.completado,
+                        'fecha_actualizacion': progreso.fecha_actualizacion.isoformat()
+                    },
+                    'message': 'Progreso actualizado correctamente'
                 })
             except ValueError:
                 return JsonResponse({
@@ -258,9 +266,14 @@ def actualizar_progreso_ajax(request, pk):
         
         return JsonResponse({
             'success': False,
-            'error': 'Progreso no proporcionado'
+            'error': 'Progreso no proporcionado en el JSON'
         }, status=400)
     
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'error': 'JSON inválido'
+        }, status=400)
     except Exception as e:
         return JsonResponse({
             'success': False,
