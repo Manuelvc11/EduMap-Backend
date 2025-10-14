@@ -12,7 +12,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 import json
 from .forms import FormularioRegistroPersonalizado, FormularioPerfilUsuario
-from .models import PerfilUsuario
+from .models import PerfilUsuario, Usuario
 
 
 def vista_home(request):
@@ -166,7 +166,7 @@ def vista_registro(request):
         data = json.loads(request.body)
         
         # Validar campos requeridos
-        required_fields = ['email', 'password', 'username']
+        required_fields = ['email', 'password', 'username', 'nombre']
         for field in required_fields:
             if not data.get(field):
                 return JsonResponse({
@@ -181,11 +181,18 @@ def vista_registro(request):
                 'message': 'El email ya está registrado'
             }, status=400)
         
-        # Crear el usuario
+        # Crear el usuario de Django
         user = User.objects.create_user(
             email=data['email'],
             password=data['password'],
             username=data['username'],
+        )
+        
+        # Crear el usuario personalizado
+        usuario = Usuario.objects.create(
+            nombre=data['nombre'],
+            correo=data['email'],
+            contrasena=data['password']  # Nota: en producción deberías encriptar esta contraseña
         )
         
         return JsonResponse({
@@ -195,6 +202,7 @@ def vista_registro(request):
                 'id': user.id,
                 'email': user.email,
                 'username': user.username,
+                'nombre': usuario.nombre
             }
         }, status=201)
         
