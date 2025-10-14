@@ -125,16 +125,15 @@ def vista_dashboard(request):
         except PerfilUsuario.DoesNotExist:
             perfil = None
         
-        perfil_data = None
-        if perfil:
-            perfil_data = {
-                'telefono': perfil.telefono,
-                'fecha_nacimiento': perfil.fecha_nacimiento.isoformat() if perfil.fecha_nacimiento else None,
-                'direccion': perfil.direccion,
-                'avatar': perfil.avatar.url if perfil.avatar else None,
-                'fecha_creacion': perfil.fecha_creacion.isoformat(),
-                'fecha_actualizacion': perfil.fecha_actualizacion.isoformat()
-            }
+        # Obtener datos del perfil
+        perfil_data = {
+            'telefono': perfil.telefono if perfil else None,
+            'fecha_nacimiento': perfil.fecha_nacimiento.isoformat() if perfil and perfil.fecha_nacimiento else None,
+            'direccion': perfil.direccion if perfil else None,
+            'avatar': perfil.avatar.url if perfil and perfil.avatar else None,
+            'fecha_creacion': perfil.fecha_creacion.isoformat() if perfil else None,
+            'fecha_actualizacion': perfil.fecha_actualizacion.isoformat() if perfil else None
+        }
         
         # Obtener el usuario personalizado
         try:
@@ -257,18 +256,19 @@ def vista_perfil(request):
             except Usuario.DoesNotExist:
                 nombre_completo = f"{request.user.first_name} {request.user.last_name}"
 
+            # Preparar datos de usuario y perfil
             perfil_data = {
-                'username': perfil.usuario.username,
-                'email': perfil.usuario.email,
-                'first_name': perfil.usuario.first_name,
-                'last_name': perfil.usuario.last_name,
+                'username': request.user.username,
+                'email': request.user.email,
+                'first_name': request.user.first_name or '',
+                'last_name': request.user.last_name or '',
                 'nombre_completo': nombre_completo,
-                'telefono': perfil.telefono,
-                'fecha_nacimiento': perfil.fecha_nacimiento.isoformat() if perfil.fecha_nacimiento else None,
-                'direccion': perfil.direccion,
-                'avatar': perfil.avatar.url if perfil.avatar else None,
-                'fecha_creacion': perfil.fecha_creacion.isoformat(),
-                'fecha_actualizacion': perfil.fecha_actualizacion.isoformat()
+                'telefono': perfil.telefono if perfil else None,
+                'fecha_nacimiento': perfil.fecha_nacimiento.isoformat() if perfil and perfil.fecha_nacimiento else None,
+                'direccion': perfil.direccion if perfil else None,
+                'avatar': perfil.avatar.url if perfil and perfil.avatar else None,
+                'fecha_creacion': perfil.fecha_creacion.isoformat() if perfil else None,
+                'fecha_actualizacion': perfil.fecha_actualizacion.isoformat() if perfil else None
             }
             
             return JsonResponse({
