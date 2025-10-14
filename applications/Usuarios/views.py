@@ -134,6 +134,8 @@ def vista_dashboard(request):
         
         # Preparar datos de perfil
         perfil_data = {
+            'first_name': perfil.first_name or request.user.first_name or '',
+            'last_name': perfil.last_name or request.user.last_name or '',
             'telefono': perfil.telefono or '',
             'fecha_nacimiento': perfil.fecha_nacimiento.isoformat() if perfil.fecha_nacimiento else None,
             'direccion': perfil.direccion or '',
@@ -277,6 +279,8 @@ def vista_perfil(request):
             }
             
             perfil_data = {
+                'first_name': perfil.first_name or request.user.first_name or '',
+                'last_name': perfil.last_name or request.user.last_name or '',
                 'telefono': perfil.telefono or '',
                 'fecha_nacimiento': perfil.fecha_nacimiento.isoformat() if perfil.fecha_nacimiento else None,
                 'direccion': perfil.direccion or '',
@@ -311,10 +315,12 @@ def vista_perfil(request):
                             'message': 'Formato de fecha inválido. Use YYYY-MM-DD'
                         }, status=400)
                 
-                # Actualizar datos del usuario
+                # Actualizar datos del usuario y perfil
                 if 'first_name' in data:
+                    perfil.first_name = data['first_name']
                     request.user.first_name = data['first_name']
                 if 'last_name' in data:
+                    perfil.last_name = data['last_name']
                     request.user.last_name = data['last_name']
                 
                 # Actualizar el usuario personalizado si existe
