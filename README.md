@@ -6,7 +6,7 @@ Backend del proyecto EduMap desarrollado con Django. API REST para la gestión d
 
 ### Endpoints de Usuarios
 
-#### Registro de Usuario
+#### 1. Registro de Usuario
 ```http
 POST /api/usuarios/register/
 ```
@@ -16,12 +16,34 @@ Request Body:
     "email": "usuario@ejemplo.com",
     "password": "contraseña123",
     "username": "usuario123",
-    "first_name": "Juan",
-    "last_name": "Pérez"
+    "first_name": "Juan",    // Opcional
+    "last_name": "Pérez"     // Opcional
+}
+```
+Response (201 Created):
+```json
+{
+    "success": true,
+    "message": "¡Cuenta creada exitosamente! Ahora puedes iniciar sesión.",
+    "user": {
+        "id": 1,
+        "email": "usuario@ejemplo.com",
+        "username": "usuario123",
+        "first_name": "Juan",
+        "last_name": "Pérez",
+        "nombre_completo": "Juan Pérez"
+    }
+}
+```
+Response (400 Bad Request):
+```json
+{
+    "success": false,
+    "message": "El email ya está registrado"
 }
 ```
 
-#### Inicio de Sesión
+#### 2. Inicio de Sesión
 ```http
 POST /api/usuarios/login/
 ```
@@ -32,51 +54,236 @@ Request Body:
     "password": "contraseña123"
 }
 ```
+Response (200 OK):
+```json
+{
+    "success": true,
+    "message": "¡Bienvenido, Juan!",
+    "user": {
+        "id": 1,
+        "username": "usuario123",
+        "email": "usuario@ejemplo.com",
+        "first_name": "Juan",
+        "last_name": "Pérez",
+        "is_active": true,
+        "date_joined": "2025-10-14T12:00:00Z"
+    }
+}
+```
+Response (401 Unauthorized):
+```json
+{
+    "success": false,
+    "message": "Credenciales inválidas"
+}
+```
 
-#### Dashboard de Usuario
+#### 3. Dashboard de Usuario
 ```http
 GET /api/usuarios/dashboard/
 ```
 Headers requeridos:
 - Cookie: sessionid=<your_session_id>
 
-#### Perfil de Usuario
-```http
-GET /api/usuarios/profile/
-POST /api/usuarios/profile/
-```
-Para actualizar el perfil (POST):
+Response (200 OK):
 ```json
 {
-    "telefono": "1234567890",
-    "fecha_nacimiento": "1990-01-01",
-    "direccion": "Calle Principal 123"
+    "success": true,
+    "user": {
+        "id": 1,
+        "username": "usuario123",
+        "email": "usuario@ejemplo.com",
+        "first_name": "Juan",
+        "last_name": "Pérez",
+        "nombre_completo": "Juan Pérez",
+        "is_active": true,
+        "date_joined": "2025-10-14T12:00:00Z"
+    },
+    "perfil": {
+        "first_name": "Juan",
+        "last_name": "Pérez",
+        "telefono": "1234567890",
+        "fecha_nacimiento": "1990-01-01",
+        "direccion": "Calle Principal 123",
+        "avatar": "/media/avatars/usuario123.jpg",
+        "fecha_creacion": "2025-10-14T12:00:00Z",
+        "fecha_actualizacion": "2025-10-14T12:00:00Z"
+    }
+}
+```
+Response (401 Unauthorized):
+```json
+{
+    "success": false,
+    "message": "Autenticación requerida"
+}
+```
+
+#### 4. Perfil de Usuario
+##### GET /api/usuarios/profile/
+Headers requeridos:
+- Cookie: sessionid=<your_session_id>
+
+Response (200 OK):
+```json
+{
+    "success": true,
+    "user": {
+        "id": 1,
+        "username": "usuario123",
+        "email": "usuario@ejemplo.com",
+        "first_name": "Juan",
+        "last_name": "Pérez",
+        "nombre_completo": "Juan Pérez"
+    },
+    "perfil": {
+        "first_name": "Juan",
+        "last_name": "Pérez",
+        "telefono": "1234567890",
+        "fecha_nacimiento": "1990-01-01",
+        "direccion": "Calle Principal 123",
+        "avatar": "/media/avatars/usuario123.jpg",
+        "fecha_creacion": "2025-10-14T12:00:00Z",
+        "fecha_actualizacion": "2025-10-14T12:00:00Z"
+    }
+}
+```
+
+##### POST /api/usuarios/profile/
+Headers requeridos:
+- Cookie: sessionid=<your_session_id>
+- Content-Type: application/json
+
+Request Body:
+```json
+{
+    "first_name": "Juan",        // Opcional
+    "last_name": "Pérez",        // Opcional
+    "telefono": "1234567890",    // Opcional
+    "fecha_nacimiento": "1990-01-01",  // Opcional, formato YYYY-MM-DD
+    "direccion": "Calle Principal 123" // Opcional
+}
+```
+
+Response (200 OK):
+```json
+{
+    "success": true,
+    "message": "Perfil actualizado correctamente",
+    "user": {
+        "id": 1,
+        "username": "usuario123",
+        "email": "usuario@ejemplo.com",
+        "first_name": "Juan",
+        "last_name": "Pérez",
+        "nombre_completo": "Juan Pérez"
+    },
+    "perfil": {
+        "first_name": "Juan",
+        "last_name": "Pérez",
+        "telefono": "1234567890",
+        "fecha_nacimiento": "1990-01-01",
+        "direccion": "Calle Principal 123",
+        "avatar": "/media/avatars/usuario123.jpg",
+        "fecha_creacion": "2025-10-14T12:00:00Z",
+        "fecha_actualizacion": "2025-10-14T12:00:00Z"
+    }
+}
+```
+
+Response (400 Bad Request):
+```json
+{
+    "success": false,
+    "message": "Formato de fecha inválido. Use YYYY-MM-DD"
 }
 ```
 
 ### Endpoints de Progreso
 
-#### Listar Progresos
+#### 1. Listar Progresos
 ```http
 GET /api/progreso/
 ```
+Headers requeridos:
+- Cookie: sessionid=<your_session_id>
 
-#### Crear Progreso
+Query Parameters:
+- actividad (opcional): Filtrar por nombre de actividad
+- completado (opcional): Filtrar por estado (true/false)
+- page (opcional): Número de página para paginación
+
+Response (200 OK):
+```json
+{
+    "success": true,
+    "progresos": [
+        {
+            "id": 1,
+            "actividad": "Matemáticas",
+            "progreso": 75.0,
+            "completado": false,
+            "fecha_inicio": "2025-10-14T12:00:00Z",
+            "fecha_actualizacion": "2025-10-14T12:00:00Z",
+            "resultado": ""
+        }
+    ],
+    "pagination": {
+        "current_page": 1,
+        "total_pages": 1,
+        "total_items": 1,
+        "has_next": false,
+        "has_previous": false
+    },
+    "filters": {
+        "actividad": null,
+        "completado": null
+    }
+}
+```
+
+#### 2. Crear Progreso
 ```http
 POST /api/progreso/crear/
 ```
+Headers requeridos:
+- Cookie: sessionid=<your_session_id>
+- Content-Type: application/json
+
 Request Body:
 ```json
 {
     "actividad": "Matemáticas",
-    "progreso": 75
+    "progreso": 75,
+    "resultado": "Notas adicionales"  // Opcional
 }
 ```
 
-#### Actualizar Progreso
+Response (201 Created):
+```json
+{
+    "success": true,
+    "message": "Progreso creado exitosamente",
+    "progreso": {
+        "id": 1,
+        "actividad": "Matemáticas",
+        "progreso": 75.0,
+        "completado": false,
+        "fecha_inicio": "2025-10-14T12:00:00Z",
+        "fecha_actualizacion": "2025-10-14T12:00:00Z",
+        "resultado": "Notas adicionales"
+    }
+}
+```
+
+#### 3. Actualizar Progreso
 ```http
 POST /api/progreso/{id}/actualizar/
 ```
+Headers requeridos:
+- Cookie: sessionid=<your_session_id>
+- Content-Type: application/json
+
 Request Body:
 ```json
 {
@@ -84,14 +291,73 @@ Request Body:
 }
 ```
 
-#### Detalle de Progreso
+Response (200 OK):
+```json
+{
+    "success": true,
+    "data": {
+        "id": 1,
+        "progreso": 85.0,
+        "completado": false,
+        "fecha_actualizacion": "2025-10-14T12:00:00Z"
+    },
+    "message": "Progreso actualizado correctamente"
+}
+```
+
+#### 4. Detalle de Progreso
 ```http
 GET /api/progreso/{id}/
 ```
+Headers requeridos:
+- Cookie: sessionid=<your_session_id>
 
-#### Eliminar Progreso
+Response (200 OK):
+```json
+{
+    "success": true,
+    "progreso": {
+        "id": 1,
+        "actividad": "Matemáticas",
+        "progreso": 85.0,
+        "completado": false,
+        "fecha_inicio": "2025-10-14T12:00:00Z",
+        "fecha_actualizacion": "2025-10-14T12:00:00Z",
+        "resultado": "Notas adicionales",
+        "logs": [
+            {
+                "id": 1,
+                "progreso_anterior": 75.0,
+                "progreso_nuevo": 85.0,
+                "descripcion": "Progreso actualizado mediante API",
+                "fecha_cambio": "2025-10-14T12:00:00Z"
+            }
+        ]
+    }
+}
+```
+
+#### 5. Eliminar Progreso
 ```http
 POST /api/progreso/{id}/eliminar/
+```
+Headers requeridos:
+- Cookie: sessionid=<your_session_id>
+
+Response (200 OK):
+```json
+{
+    "success": true,
+    "message": "Progreso eliminado exitosamente"
+}
+```
+
+Response (404 Not Found):
+```json
+{
+    "success": false,
+    "message": "Progreso no encontrado"
+}
 ```
 
 ## Requisitos Previos
