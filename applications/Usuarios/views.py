@@ -119,41 +119,43 @@ def vista_dashboard(request):
     API del dashboard después del inicio de sesión
     """
     try:
-        perfil = None
+        # Obtener perfil
         try:
             perfil = request.user.perfil
         except PerfilUsuario.DoesNotExist:
-            perfil = None
+            perfil = PerfilUsuario.objects.create(usuario=request.user)
         
-        # Obtener datos del perfil
-        perfil_data = {
-            'telefono': perfil.telefono if perfil else None,
-            'fecha_nacimiento': perfil.fecha_nacimiento.isoformat() if perfil and perfil.fecha_nacimiento else None,
-            'direccion': perfil.direccion if perfil else None,
-            'avatar': perfil.avatar.url if perfil and perfil.avatar else None,
-            'fecha_creacion': perfil.fecha_creacion.isoformat() if perfil else None,
-            'fecha_actualizacion': perfil.fecha_actualizacion.isoformat() if perfil else None
-        }
-        
-        # Obtener el usuario personalizado
+        # Obtener usuario personalizado
         try:
             usuario = Usuario.objects.get(correo=request.user.email)
             nombre_completo = usuario.nombre
         except Usuario.DoesNotExist:
-            nombre_completo = f"{request.user.first_name} {request.user.last_name}"
+            nombre_completo = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
+        
+        # Preparar datos de perfil
+        perfil_data = {
+            'telefono': perfil.telefono or '',
+            'fecha_nacimiento': perfil.fecha_nacimiento.isoformat() if perfil.fecha_nacimiento else None,
+            'direccion': perfil.direccion or '',
+            'avatar': perfil.avatar.url if perfil.avatar else None,
+            'fecha_creacion': perfil.fecha_creacion.isoformat(),
+            'fecha_actualizacion': perfil.fecha_actualizacion.isoformat()
+        }
+
+        user_data = {
+            'id': request.user.id,
+            'username': request.user.username,
+            'email': request.user.email,
+            'first_name': request.user.first_name or '',
+            'last_name': request.user.last_name or '',
+            'nombre_completo': nombre_completo,
+            'is_active': request.user.is_active,
+            'date_joined': request.user.date_joined.isoformat()
+        }
 
         return JsonResponse({
             'success': True,
-            'user': {
-                'id': request.user.id,
-                'username': request.user.username,
-                'email': request.user.email,
-                'first_name': request.user.first_name,
-                'last_name': request.user.last_name,
-                'nombre_completo': nombre_completo,
-                'is_active': request.user.is_active,
-                'date_joined': request.user.date_joined.isoformat()
-            },
+            'user': user_data,
             'perfil': perfil_data
         })
     except Exception as e:
@@ -173,7 +175,7 @@ def vista_registro(request):
         data = json.loads(request.body)
         
         # Validar campos requeridos
-        required_fields = ['email', 'password', 'username', 'first_name', 'last_name']
+        required_fields = ['email', 'password', 'username']
         for field in required_fields:
             if not data.get(field):
                 return JsonResponse({
@@ -195,18 +197,25 @@ def vista_registro(request):
                 'message': 'El nombre de usuario ya está registrado'
             }, status=400)
         
-        # Crear el usuario de Django
+        # Crear el usuario de Django con nombre y apellido opcionales
         user = User.objects.create_user(
-            email=data['email'],
-            password=data['password'],
             username=data['username'],
-            first_name=data['first_name'],
-            last_name=data['last_name']
+            email=data['email'],
+            password=data['password']
         )
         
+        # Actualizar first_name y last_name si se proporcionan
+        user.first_name = data.get('first_name', '')
+        user.last_name = data.get('last_name', '')
+        user.save()
+        
         # Crear el usuario personalizado
+        nombre_completo = f"{data.get('first_name', '')} {data.get('last_name', '')}".strip()
+        if not nombre_completo:
+            nombre_completo = data['username']
+            
         usuario = Usuario.objects.create(
-            nombre=f"{data['first_name']} {data['last_name']}",
+            nombre=nombre_completo,
             correo=data['email'],
             contrasena=data['password']  # Nota: en producción deberías encriptar esta contraseña
         )
@@ -243,36 +252,42 @@ def vista_perfil(request):
     API para ver y editar el perfil del usuario
     """
     try:
+        # Obtener o crear perfil
         try:
             perfil = request.user.perfil
         except PerfilUsuario.DoesNotExist:
             perfil = PerfilUsuario.objects.create(usuario=request.user)
         
         if request.method == 'GET':
-            # Obtener el usuario personalizado
+            # Obtener usuario personalizado
             try:
                 usuario = Usuario.objects.get(correo=request.user.email)
                 nombre_completo = usuario.nombre
             except Usuario.DoesNotExist:
-                nombre_completo = f"{request.user.first_name} {request.user.last_name}"
+                nombre_completo = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
 
             # Preparar datos de usuario y perfil
-            perfil_data = {
+            user_data = {
+                'id': request.user.id,
                 'username': request.user.username,
                 'email': request.user.email,
                 'first_name': request.user.first_name or '',
                 'last_name': request.user.last_name or '',
-                'nombre_completo': nombre_completo,
-                'telefono': perfil.telefono if perfil else None,
-                'fecha_nacimiento': perfil.fecha_nacimiento.isoformat() if perfil and perfil.fecha_nacimiento else None,
-                'direccion': perfil.direccion if perfil else None,
-                'avatar': perfil.avatar.url if perfil and perfil.avatar else None,
-                'fecha_creacion': perfil.fecha_creacion.isoformat() if perfil else None,
-                'fecha_actualizacion': perfil.fecha_actualizacion.isoformat() if perfil else None
+                'nombre_completo': nombre_completo
+            }
+            
+            perfil_data = {
+                'telefono': perfil.telefono or '',
+                'fecha_nacimiento': perfil.fecha_nacimiento.isoformat() if perfil.fecha_nacimiento else None,
+                'direccion': perfil.direccion or '',
+                'avatar': perfil.avatar.url if perfil.avatar else None,
+                'fecha_creacion': perfil.fecha_creacion.isoformat(),
+                'fecha_actualizacion': perfil.fecha_actualizacion.isoformat()
             }
             
             return JsonResponse({
                 'success': True,
+                'user': user_data,
                 'perfil': perfil_data
             })
         
