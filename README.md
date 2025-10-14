@@ -1,6 +1,98 @@
 # EduMap Backend
 
-Backend del proyecto EduMap desarrollado con Django.
+Backend del proyecto EduMap desarrollado con Django. API REST para la gestión de usuarios y progreso de actividades educativas.
+
+## Documentación de la API
+
+### Endpoints de Usuarios
+
+#### Registro de Usuario
+```http
+POST /api/usuarios/register/
+```
+Request Body:
+```json
+{
+    "email": "usuario@ejemplo.com",
+    "password": "contraseña123",
+    "username": "usuario123",
+    "first_name": "Juan",
+    "last_name": "Pérez"
+}
+```
+
+#### Inicio de Sesión
+```http
+POST /api/usuarios/login/
+```
+Request Body:
+```json
+{
+    "username": "usuario123",
+    "password": "contraseña123"
+}
+```
+
+#### Dashboard de Usuario
+```http
+GET /api/usuarios/dashboard/
+```
+Headers requeridos:
+- Cookie: sessionid=<your_session_id>
+
+#### Perfil de Usuario
+```http
+GET /api/usuarios/profile/
+POST /api/usuarios/profile/
+```
+Para actualizar el perfil (POST):
+```json
+{
+    "telefono": "1234567890",
+    "fecha_nacimiento": "1990-01-01",
+    "direccion": "Calle Principal 123"
+}
+```
+
+### Endpoints de Progreso
+
+#### Listar Progresos
+```http
+GET /api/progreso/
+```
+
+#### Crear Progreso
+```http
+POST /api/progreso/crear/
+```
+Request Body:
+```json
+{
+    "actividad": "Matemáticas",
+    "progreso": 75
+}
+```
+
+#### Actualizar Progreso
+```http
+POST /api/progreso/{id}/actualizar/
+```
+Request Body:
+```json
+{
+    "progreso": 85
+}
+```
+
+#### Detalle de Progreso
+```http
+GET /api/progreso/{id}/
+```
+
+#### Eliminar Progreso
+```http
+POST /api/progreso/{id}/eliminar/
+```
 
 ## Requisitos Previos
 
@@ -79,6 +171,84 @@ python manage.py runserver
 ```
 
 El servidor estará disponible en: http://127.0.0.1:8000/
+
+## Respuestas de la API
+
+### Respuestas de Usuario
+
+#### Registro Exitoso
+```json
+{
+    "success": true,
+    "message": "¡Cuenta creada exitosamente! Ahora puedes iniciar sesión.",
+    "user": {
+        "id": 1,
+        "email": "usuario@ejemplo.com",
+        "username": "usuario123",
+        "first_name": "Juan",
+        "last_name": "Pérez",
+        "nombre_completo": "Juan Pérez"
+    }
+}
+```
+
+#### Inicio de Sesión Exitoso
+```json
+{
+    "success": true,
+    "message": "¡Bienvenido, Juan!",
+    "user": {
+        "id": 1,
+        "username": "usuario123",
+        "email": "usuario@ejemplo.com",
+        "first_name": "Juan",
+        "last_name": "Pérez",
+        "is_active": true,
+        "date_joined": "2025-10-14T12:00:00Z"
+    }
+}
+```
+
+#### Dashboard
+```json
+{
+    "success": true,
+    "user": {
+        "id": 1,
+        "username": "usuario123",
+        "email": "usuario@ejemplo.com",
+        "first_name": "Juan",
+        "last_name": "Pérez",
+        "nombre_completo": "Juan Pérez",
+        "is_active": true,
+        "date_joined": "2025-10-14T12:00:00Z"
+    },
+    "perfil": {
+        "telefono": "1234567890",
+        "fecha_nacimiento": "1990-01-01",
+        "direccion": "Calle Principal 123",
+        "avatar": "/media/avatars/usuario123.jpg",
+        "fecha_creacion": "2025-10-14T12:00:00Z",
+        "fecha_actualizacion": "2025-10-14T12:00:00Z"
+    }
+}
+```
+
+### Respuestas de Progreso
+
+#### Actualización de Progreso
+```json
+{
+    "success": true,
+    "data": {
+        "id": 5,
+        "progreso": 85.0,
+        "completado": false,
+        "fecha_actualizacion": "2025-10-14T12:00:00Z"
+    },
+    "message": "Progreso actualizado correctamente"
+}
+```
 
 ## Estructura del Proyecto
 

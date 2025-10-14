@@ -136,6 +136,13 @@ def vista_dashboard(request):
                 'fecha_actualizacion': perfil.fecha_actualizacion.isoformat()
             }
         
+        # Obtener el usuario personalizado
+        try:
+            usuario = Usuario.objects.get(correo=request.user.email)
+            nombre_completo = usuario.nombre
+        except Usuario.DoesNotExist:
+            nombre_completo = f"{request.user.first_name} {request.user.last_name}"
+
         return JsonResponse({
             'success': True,
             'user': {
@@ -144,6 +151,7 @@ def vista_dashboard(request):
                 'email': request.user.email,
                 'first_name': request.user.first_name,
                 'last_name': request.user.last_name,
+                'nombre_completo': nombre_completo,
                 'is_active': request.user.is_active,
                 'date_joined': request.user.date_joined.isoformat()
             },
@@ -242,9 +250,19 @@ def vista_perfil(request):
             perfil = PerfilUsuario.objects.create(usuario=request.user)
         
         if request.method == 'GET':
+            # Obtener el usuario personalizado
+            try:
+                usuario = Usuario.objects.get(correo=request.user.email)
+                nombre_completo = usuario.nombre
+            except Usuario.DoesNotExist:
+                nombre_completo = f"{request.user.first_name} {request.user.last_name}"
+
             perfil_data = {
                 'username': perfil.usuario.username,
                 'email': perfil.usuario.email,
+                'first_name': perfil.usuario.first_name,
+                'last_name': perfil.usuario.last_name,
+                'nombre_completo': nombre_completo,
                 'telefono': perfil.telefono,
                 'fecha_nacimiento': perfil.fecha_nacimiento.isoformat() if perfil.fecha_nacimiento else None,
                 'direccion': perfil.direccion,
@@ -283,6 +301,11 @@ def vista_perfil(request):
                 'success': True,
                 'message': 'Perfil actualizado correctamente',
                 'perfil': {
+                    'username': perfil.usuario.username,
+                    'email': perfil.usuario.email,
+                    'first_name': perfil.usuario.first_name,
+                    'last_name': perfil.usuario.last_name,
+                    'nombre_completo': f"{perfil.usuario.first_name} {perfil.usuario.last_name}",
                     'telefono': perfil.telefono,
                     'fecha_nacimiento': perfil.fecha_nacimiento.isoformat() if perfil.fecha_nacimiento else None,
                     'direccion': perfil.direccion,
