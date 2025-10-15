@@ -9,5 +9,5 @@ urlpatterns = [
     path('<int:pk>/', views.detalle_progreso, name='detalle'),
     path('<int:pk>/editar/', views.editar_progreso, name='editar'),
     path('<int:pk>/eliminar/', views.eliminar_progreso, name='eliminar'),
-    path('<int:pk>/actualizar-ajax/', views.actualizar_progreso_ajax, name='actualizar_ajax'),
+    path('<int:pk>/actualizar/', views.actualizar_progreso, name='actualizar'),
 ]
